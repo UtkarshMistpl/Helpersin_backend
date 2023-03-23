@@ -2,6 +2,8 @@ var jwt = require("jsonwebtoken");
 var config = require("../config/constant");
 const bycrypt = require("bcrypt");
 const { check } = require("express-validator");
+const multer = require("multer");
+const { diskStorage } = require("multer");
 
 const createToken = (user) => {
 	var token = jwt.sign({ sub: user.email }, config.JWT_SECRET, {
@@ -42,9 +44,23 @@ const createHash = async (myPlaintextPassword) => {
 	return hash;
 };
 
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		cb(null, "/Nodejs/helpersin_backend/uploads/workers/profile");
+	},
+	filename: function (req, file, cb) {
+		const uniqueSuffix =
+			Date.now() + "-" + Math.round(Math.random() * 1e9) + ".jpg";
+		cb(null, file.fieldname + "-" + uniqueSuffix);
+	},
+});
+
+const upload = multer({ storage: storage }).single("profile_pic");
+
 module.exports = {
 	createToken,
 	verifyPassword,
 	formValidator,
 	createHash,
+	upload,
 };
