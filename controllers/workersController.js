@@ -26,7 +26,11 @@ const getWorkers = async (req, res) => {
 	});
 
 	console.log("All Workers:", JSON.stringify(filteredWorkers, null, 2));
-	res.json({ status: "success", workers: filteredWorkers });
+	if (!lat) {
+		res.json({ status: "success", workers: workers });
+	} else {
+		res.json({ status: "success", workers: filteredWorkers });
+	}
 };
 
 const getOneWorker = async (req, res) => {
@@ -75,6 +79,35 @@ const getAllWorkers = async (req, res) => {
 	res.json({ status: "success", workers: workers });
 };
 
+const getWorkersByCategory = async (req, res) => {
+	const category = req.body.category;
+	// const page = req.body.page ? req.body.page : 1;
+	// const rows = req.body.rows ? req.body.rows : 10;
+
+	//check if category recieved
+	if (!category) {
+		res.json({ status: "error", message: "please choose a category" });
+	}
+
+	// Find all categories
+	const workers = await Workers.findAll({
+		where: {
+			category: category,
+		},
+	});
+
+	if (!workers) {
+		res.json({ status: "error", message: "failed no workers found" });
+	}
+
+	//calculate distance
+	// let filteredWorkers = worker.filter((it) => {
+	// 	return getDistance(it.lat, it.lng, lat, lng) <= distance;
+	// });
+
+	console.log("Worker by Category", JSON.stringify(workers, null, 2));
+	res.json({ status: "success", workers: workers });
+};
 const deleteOneWorker = async (req, res) => {
 	const id = req.body.id;
 
@@ -183,11 +216,12 @@ const editWorker = async (req, res) => {
 	res.json({ status: "success", message: "data edited successfully" });
 	console.log("edited Worker", JSON.stringify(result, null, 2));
 };
-
+const getWorkersByField = async (req, res) => {};
 module.exports = {
 	getWorkers,
 	getOneWorker,
 	getAllWorkers,
+	getWorkersByCategory,
 	deleteOneWorker,
 	saveWorker,
 	editWorker,
